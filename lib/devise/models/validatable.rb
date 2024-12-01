@@ -18,7 +18,9 @@ module Devise
     #   * +password_requires_special_character+: a boolean to require a special character in the password. Defaults to false.
     #   * +password_requires_number+: a boolean to require a number in the password. Defaults to false.
     #   * +password_special_characters+: a string with the special characters that are allowed in the password. Defaults to nil.
-    
+    #
+    # Since +password_length+ is applied in a proc within `validates_length_of` it can be overridden
+    # at runtime.
     module Validatable
       # All validations used by this module.
       VALIDATIONS = [:validates_presence_of, :validates_uniqueness_of, :validates_format_of,
@@ -39,7 +41,7 @@ module Devise
 
           validates_presence_of     :password, if: :password_required?
           validates_confirmation_of :password, if: :password_required?
-          validates_length_of       :password, within: password_length, allow_blank: true
+          validates_length_of       :password, minimum: proc { password_length.min }, maximum: proc { password_length.max }, allow_blank: true
 
           validates_format_of :password, with: /\p{Lower}/, if: -> { password_requires_lowercase }, message: :must_contain_lowercase
           validates_format_of :password, with: /\p{Upper}/, if: -> { password_requires_uppercase }, message: :must_contain_uppercase
